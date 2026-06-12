@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PackageGuard | AI Package Hallucination Firewall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #080b12; --surface: #0f1420; --surface2: #161d2e;
+  --border: #1e2840; --accent: #4f8ef7; --green: #10d98c;
+  --red: #f75a5a; --yellow: #f5c34a; --purple: #a78bfa;
+  --orange: #fb923c; --text: #e2e8f0; --muted: #4a5568;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{font-size:26px;}
+.logo-text{font-size:17px;font-weight:700;background:linear-gradient(135deg,#4f8ef7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(16,217,140,.1);color:var(--green);border:1px solid rgba(16,217,140,.2);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+main{padding:24px 28px;display:grid;gap:20px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat:hover{border-color:var(--accent);}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.stat-value{font-size:38px;font-weight:700;font-family:'JetBrains Mono',monospace;margin:8px 0 2px;}
+.stat-sub{font-size:10px;color:var(--muted);}
+.v-blue{color:var(--accent)}.v-green{color:var(--green)}.v-red{color:var(--red)}.v-yellow{color:var(--yellow)}
+.grid2{display:grid;grid-template-columns:340px 1fr;gap:20px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.pt{font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;}
+.pb{padding:18px;}
+label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;}
+input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;}
+input:focus,select:focus{border-color:var(--accent);}
+.fg{margin-bottom:12px;}
+.row{display:flex;gap:8px;}
+button{padding:9px 18px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;}
+button:active{transform:scale(.97);}
+button:disabled{opacity:.4;cursor:not-allowed;}
+.btn-p{background:linear-gradient(135deg,#4f8ef7,#6366f1);color:#fff;flex:1;}
+.btn-b{background:linear-gradient(135deg,#f75a5a,#dc2626);color:#fff;}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 12px;font-size:10px;}
+.btn-g:hover{color:var(--text);border-color:var(--accent);}
+.result{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-height:60px;max-height:220px;overflow-y:auto;color:var(--muted);white-space:pre-wrap;word-break:break-all;}
+.result.ok{border-color:rgba(16,217,140,.35);color:var(--green);}
+.result.warn{border-color:rgba(245,195,74,.35);color:var(--yellow);}
+.result.err{border-color:rgba(247,90,90,.35);color:var(--red);}
+.presets{display:flex;flex-direction:column;gap:6px;}
+.preset{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s;}
+.preset:hover{border-color:var(--accent);background:rgba(79,142,247,.05);}
+.pname{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.pdesc{font-size:10px;color:var(--muted);margin-top:2px;}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.b-block{background:rgba(247,90,90,.12);color:var(--red);border:1px solid rgba(247,90,90,.25);}
+.b-warn{background:rgba(245,195,74,.12);color:var(--yellow);border:1px solid rgba(245,195,74,.25);}
+.b-allow{background:rgba(16,217,140,.1);color:var(--green);border:1px solid rgba(16,217,140,.2);}
+#feed{display:flex;flex-direction:column;max-height:600px;overflow-y:auto;}
+#feed::-webkit-scrollbar{width:3px;}
+#feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.entry{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:11px 18px;border-bottom:1px solid rgba(30,40,64,.5);animation:slidein .2s ease;transition:background .15s;}
+.entry:hover{background:rgba(255,255,255,.015);}
+@keyframes slidein{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.eicon{font-size:14px;margin-top:1px;}
+.ename{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--accent);}
+.emeta{font-size:10px;color:var(--muted);margin-top:2px;}
+.ereason{font-size:10px;margin-top:3px;font-style:italic;}
+.ereason.ok{color:var(--green)}.ereason.warn{color:var(--yellow)}.ereason.err{color:var(--red)}
+.ebadge{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:4px;letter-spacing:.04em;}
+.SAFE,.ALLOW{background:rgba(16,217,140,.1);color:var(--green);}
+.LOW{background:rgba(79,142,247,.1);color:var(--accent);}
+.MEDIUM{background:rgba(245,195,74,.1);color:var(--yellow);}
+.HIGH{background:rgba(247,90,90,.12);color:var(--red);}
+.CRITICAL{background:rgba(255,60,80,.15);color:#ff3c50;}
+.eright{text-align:right;}
+.etime{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.elatency{font-size:10px;color:var(--muted);margin-top:2px;}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:8px;}
+.empty-icon{font-size:36px;opacity:.25;}
+.risk-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:4px;}
+.risk-bar{height:4px;border-radius:2px;transition:width .4s;}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <div>
+      <div class="logo-text">PackageGuard</div>
+      <div class="logo-sub">AI Package Hallucination Firewall — Zero-Trust Package Security</div>
+    </div>
+  </div>
+  <div id="conn-pill" class="pill"><div class="dot"></div><span>Connecting…</span></div>
+</header>
+
+<main>
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Packages Checked</div><div class="stat-value v-blue" id="s-total">0</div><div class="stat-sub">since page load</div></div>
+    <div class="stat"><div class="stat-label">Allowed</div><div class="stat-value v-green" id="s-allow">0</div><div class="stat-sub">passed all checks</div></div>
+    <div class="stat"><div class="stat-label">Blocked</div><div class="stat-value v-red" id="s-block">0</div><div class="stat-sub">hallucinated / dangerous</div></div>
+    <div class="stat"><div class="stat-label">Warnings</div><div class="stat-value v-yellow" id="s-warn">0</div><div class="stat-sub">suspicious — review needed</div></div>
+  </div>
+
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Checker -->
+      <div class="panel">
+        <div class="ph"><div class="pt">🔍 Package Inspector</div></div>
+        <div class="pb">
+          <div class="fg"><label>Ecosystem</label>
+            <select id="eco"><option value="npm">npm</option><option value="pypi">PyPI</option></select>
+          </div>
+          <div class="fg"><label>Package Name</label>
+            <input id="pkg" type="text" value="lodash" placeholder="e.g. langchain-openai-utils-v2"/>
+          </div>
+          <div class="fg"><label>Version (optional)</label>
+            <input id="ver" type="text" placeholder="e.g. ^4.0.0"/>
+          </div>
+          <div class="row">
+            <button class="btn-p" onclick="checkPkg()">🔍 Inspect Package</button>
+          </div>
+          <div class="result" id="result-box">Result appears here…</div>
+        </div>
+      </div>
+
+      <!-- Attack Presets -->
+      <div class="panel">
+        <div class="ph"><div class="pt">⚡ Slopsquat Test Presets</div><span style="font-size:10px;color:var(--muted)">Click to auto-fill</span></div>
+        <div class="pb" style="padding:12px;">
+          <div class="presets" id="presets"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Feed -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">📡 Live Inspection Feed</div>
+        <button class="btn-g" onclick="clearFeed()">Clear</button>
+      </div>
+      <div id="feed">
+        <div class="empty"><div class="empty-icon">📭</div><p>Waiting for packages…</p><p style="font-size:10px;">Inspect a package to see live results</p></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:7171';
+let total=0, allowed=0, blocked=0, warned=0;
+
+const PRESETS = [
+  { name:'langchain-openai-utils-v2', eco:'npm',   desc:'AI hallucinated package name',           expect:'block' },
+  { name:'reqeusts',                  eco:'pypi',  desc:'Typosquat of "requests"',                expect:'block' },
+  { name:'lodahs',                    eco:'npm',   desc:'Typosquat of "lodash"',                  expect:'block' },
+  { name:'expres',                    eco:'npm',   desc:'Typosquat of "express"',                 expect:'block' },
+  { name:'react-dom-utils-helper-v3', eco:'npm',   desc:'Hallucinated React helper package',      expect:'block' },
+  { name:'numpy-fast-utils',          eco:'pypi',  desc:'Hallucinated NumPy extension',           expect:'block' },
+  { name:'totally-fake-pkg-xyz-2026', eco:'npm',   desc:'Non-existent hallucinated package',      expect:'block' },
+  { name:'react',                     eco:'npm',   desc:'Legitimate well-known package',          expect:'allow' },
+  { name:'requests',                  eco:'pypi',  desc:'Legitimate PyPI package',                expect:'allow' },
+];
+
+// Render presets
+const presetsEl = document.getElementById('presets');
+PRESETS.forEach(p => {
+  const d = document.createElement('div');
+  d.className = 'preset';
+  d.innerHTML = `<div><div class="pname">${p.name}</div><div class="pdesc">${p.eco} · ${p.desc}</div></div><span class="badge ${p.expect==='block'?'b-block':p.expect==='warn'?'b-warn':'b-allow'}">${p.expect.toUpperCase()}</span>`;
+  d.onclick = () => { document.getElementById('eco').value=p.eco; document.getElementById('pkg').value=p.name; document.getElementById('ver').value=''; };
+  presetsEl.appendChild(d);
+});
+
+// SSE
+function connectSSE() {
+  const es = new EventSource(`${API}/events`);
+  const pill = document.getElementById('conn-pill');
+  es.onopen = () => { pill.innerHTML='<div class="dot"></div><span>Live</span>'; pill.style.color='var(--green)'; };
+  es.onmessage = e => {
+    const ev = JSON.parse(e.data);
+    if (ev.type === 'connected') return;
+    renderEntry(ev);
+    updateStats(ev);
+  };
+  es.onerror = () => { pill.innerHTML='<div class="dot" style="background:var(--red)"></div><span>Disconnected</span>'; pill.style.color='var(--red)'; };
+}
+connectSSE();
+
+function renderEntry(ev) {
+  const feed = document.getElementById('feed');
+  const empty = feed.querySelector('.empty');
+  if (empty) empty.remove();
+
+  const icon = ev.decision==='BLOCK' ? (ev.riskLevel==='CRITICAL'?'🚨':'🚫') : ev.decision==='WARN' ? '⚠️' : '✅';
+  const time = new Date(ev.timestamp).toLocaleTimeString();
+  const riskColor = ev.riskScore > 70 ? 'var(--red)' : ev.riskScore > 40 ? 'var(--yellow)' : 'var(--green)';
+  const rc = ev.decision==='ALLOW'?'ok':ev.decision==='WARN'?'warn':'err';
+
+  const el = document.createElement('div');
+  el.className = 'entry';
+  el.innerHTML = `
+    <div class="eicon">${icon}</div>
+    <div>
+      <div class="ename">${ev.ecosystem}:<strong>${ev.packageName}</strong></div>
+      <div class="emeta">${ev.requestedBy||'manual'} · risk: ${ev.riskScore}/100</div>
+      <div class="risk-bar-wrap"><div class="risk-bar" style="width:${ev.riskScore}%;background:${riskColor}"></div></div>
+      <div class="ereason ${rc}">${ev.reasons?.[0]||''}</div>
+      <span class="ebadge ${ev.riskLevel}">${ev.riskLevel}</span>
+      <span class="ebadge ${ev.decision}" style="margin-left:4px">${ev.decision}</span>
+    </div>
+    <div class="eright">
+      <div class="etime">${time}</div>
+      <div class="elatency">${ev.latencyMs?.toFixed(1)}ms</div>
+    </div>`;
+  feed.insertBefore(el, feed.firstChild);
+}
+
+function updateStats(ev) {
+  total++;
+  if (ev.decision==='ALLOW') allowed++;
+  else if (ev.decision==='BLOCK') blocked++;
+  else warned++;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-allow').textContent=allowed;
+  document.getElementById('s-block').textContent=blocked;
+  document.getElementById('s-warn').textContent=warned;
+}
+
+async function checkPkg() {
+  const ecosystem = document.getElementById('eco').value;
+  const pkg       = document.getElementById('pkg').value.trim();
+  const ver       = document.getElementById('ver').value.trim();
+  const box       = document.getElementById('result-box');
+  if (!pkg) { box.className='result err'; box.textContent='❌ Enter a package name'; return; }
+  box.className='result'; box.textContent='Inspecting…';
+  try {
+    const res = await fetch(`${API}/check`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ ecosystem, package: pkg, version: ver||undefined, requestedBy:'dashboard' })
+    });
+    const data = await res.json();
+    const cls = data.decision==='ALLOW'?'ok':data.decision==='WARN'?'warn':'err';
+    box.className = `result ${cls}`;
+    box.textContent =
+      `${data.decision==='ALLOW'?'✅ ALLOW':data.decision==='WARN'?'⚠️  WARN':'🚫 BLOCK'} — Risk: ${data.riskScore}/100 (${data.riskLevel})\n\n` +
+      `Package : ${data.ecosystem}:${data.packageName}\n` +
+      `Exists  : ${data.registry.exists}\n` +
+      (data.registry.ageInDays!=null ? `Age     : ${data.registry.ageInDays} days\n` : '') +
+      (data.registry.weeklyDownloads!=null ? `Downloads: ${data.registry.weeklyDownloads.toLocaleString()}/wk\n` : '') +
+      (data.similarity.isTyposquat ? `Typosquat: ⚠️  similar to "${data.similarity.closestMatch}" (${data.similarity.similarityPct}%)\n` : '') +
+      `\nReasons:\n${data.reasons.map(r=>'  • '+r).join('\n')}`;
+  } catch(e) { box.className='result err'; box.textContent=`❌ ${e.message}\n\nMake sure PackageGuard API is running on port 7171`; }
+}
+
+function clearFeed() {
+  document.getElementById('feed').innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Feed cleared</p></div>';
+  total=allowed=blocked=warned=0;
+  ['s-total','s-allow','s-block','s-warn'].forEach(id=>document.getElementById(id).textContent='0');
+}
+</script>
+</body>
+</html>

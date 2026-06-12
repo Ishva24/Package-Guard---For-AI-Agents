@@ -1,0 +1,22 @@
+{
+  "name": "packageguard",
+  "version": "1.0.0",
+  "description": "Zero-trust package firewall for AI coding agents — detects and blocks hallucinated/malicious packages",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev:cli":   "npm run dev -w @packageguard/cli",
+    "dev:api":   "npm run dev -w @packageguard/core",
+    "test":      "npm run test -w @packageguard/core",
+    "build":     "npm run build --workspaces",
+    "check:npm": "node --loader ts-node/esm packages/cli/src/index.ts npm",
+    "check:pip": "node --loader ts-node/esm packages/cli/src/index.ts pip"
+  },
+  "devDependencies": {
+    "typescript":  "^5.4.5",
+    "ts-node":     "^10.9.2",
+    "@types/node": "^20.14.0",
+    "vitest":      "^1.6.0"
+  }
+}

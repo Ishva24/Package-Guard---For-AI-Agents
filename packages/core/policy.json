@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "blockNonExistent": true,
+  "blockNewPackages": true,
+  "minAgeDays": 7,
+  "minWeeklyDownloads": 50,
+  "typosquatThreshold": 80,
+  "warnSimilarityThreshold": 60,
+  "trustedPackages": [
+    "react", "react-dom", "lodash", "express", "fastify", "axios",
+    "typescript", "vite", "next", "langchain", "openai", "anthropic"
+  ],
+  "blockedPackages": [],
+  "ecosystems": ["npm", "pypi"]
+}
